@@ -6,22 +6,16 @@
     <title>Vibe Rating</title>
     <style>
         :root {
-            --bg: #0f0f11;
-            --card-bg: #1a1a1d;
-            --border: #2a2a2e;
-            --text: #ffffff;
-            --text-muted: #a0a0a5;
-            --accent: #6366f1;
-            --purple: #a855f7;
-            --success: #10b981;
-            --gold: #fbbf24;
+            --bg: #0f0f11; --card-bg: #1a1a1d; --border: #2a2a2e; --text: #ffffff;
+            --text-muted: #a0a0a5; --accent: #6366f1; --purple: #a855f7;
+            --success: #10b981; --gold: #fbbf24;
         }
         body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 800px; }
         h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 30px; }
         
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: var(--card-bg); padding: 5px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
-        .nav-tabs button { flex: 1; background: transparent; color: var(--text-muted); margin: 0; padding: 10px; border-radius: 8px; font-size: 14px; white-space: nowrap; }
+        .nav-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: var(--card-bg); padding: 5px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
+        .nav-tabs button { flex: 1; background: transparent; color: var(--text-muted); margin: 0; padding: 10px 5px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
         .nav-tabs button.active { background: var(--accent); color: white; }
         
         input[type="email"], input[type="password"], input[type="text"], input[type="file"], textarea {
@@ -83,13 +77,17 @@
         .vote-form { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 10px; }
         .vote-form h3 { margin-top: 0; margin-bottom: 15px; color: var(--accent); }
 
-        .hidden { display: none !important; }
-        
-        /* Стили для вкладки Создатели */
         .creator-card { background: linear-gradient(145deg, #1a1a1d, #111); border: 1px solid var(--gold); border-radius: 16px; padding: 30px; display: flex; gap: 30px; align-items: center; box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); }
         .creator-card img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); }
         .creator-info h2 { margin: 0 0 10px 0; font-size: 2em; color: var(--gold); border: none; padding: 0; }
         .creator-info p { margin: 0; color: #ddd; font-size: 1.1em; line-height: 1.5; }
+        
+        .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); }
+        .user-search-card img { width: 50px; height: 50px; border-radius: 50%; }
+        .user-search-card h4 { margin: 0; font-size: 1.2em; }
+        .user-search-card p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9em; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -109,15 +107,32 @@
                 <button onclick="logout()" style="width: auto; padding: 5px 15px; background: transparent; border: 1px solid var(--border);">Выйти</button>
             </div>
 
-            <!-- Добавили вкладку Создатели -->
             <div class="nav-tabs">
+                <button id="tab-home" onclick="switchTab('home')">Главная</button>
                 <button id="tab-feed" class="active" onclick="switchTab('feed')">Лента</button>
                 <button id="tab-add" onclick="switchTab('add')">Добавить</button>
                 <button id="tab-profile" onclick="switchTab('profile')">Профиль</button>
                 <button id="tab-creators" onclick="switchTab('creators')">Создатели</button>
             </div>
 
-            <div id="view-feed">
+            <!-- Вкладка: Главная -->
+            <div id="view-home" class="hidden">
+                <h2>Главная</h2>
+                <div id="home-text-container" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; white-space: pre-wrap; line-height: 1.6;"></div>
+                
+                <h2>Поиск пользователей</h2>
+                <input type="text" id="userSearch" placeholder="Введите никнейм для поиска..." oninput="searchUsers()">
+                <div id="user-results"></div>
+
+                <!-- Блок редактирования для админа -->
+                <div id="home-edit-block" class="hidden" style="margin-top: 30px; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--accent);">
+                    <h3 style="color: var(--accent); margin-top: 0;">Редактировать текст главной (только для вас)</h3>
+                    <textarea id="editHomeText" placeholder="Введите текст главной страницы..." style="min-height: 150px;"></textarea>
+                    <button onclick="saveHomeText()">Сохранить текст</button>
+                </div>
+            </div>
+
+            <div id="view-feed" class="hidden">
                 <h2>Лента постов (средние оценки)</h2>
                 <div id="feed-list"><p style="color: var(--text-muted);">Загрузка...</p></div>
             </div>
@@ -160,11 +175,10 @@
                     <button onclick="saveProfile()">Сохранить профиль</button>
                 </div>
 
-                <h2>Мои посты</h2>
+                <h2>Мои посты и оценки</h2>
                 <div id="my-posts-list"><p style="color: var(--text-muted);">Загрузка...</p></div>
             </div>
 
-            <!-- Вкладка Создатели -->
             <div id="view-creators" class="hidden">
                 <h2>Создатели проекта</h2>
                 <div class="creator-card">
@@ -175,7 +189,6 @@
                     </div>
                 </div>
                 
-                <!-- Блок редактирования (виден только вам) -->
                 <div id="creator-edit-block" class="hidden" style="margin-top: 30px; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--gold);">
                     <h3 style="color: var(--gold); margin-top: 0;">Редактирование (только для вас)</h3>
                     <label style="color: var(--text-muted); font-size: 14px;">Ник / Имя</label>
@@ -217,6 +230,9 @@
                     <div class="total-preview"><span id="vote-preview-total">90</span> <small>/ 90</small></div>
                     <button onclick="submitVote()">Отправить оценку</button>
                 </div>
+                <div id="already-voted-msg" class="hidden" style="text-align: center; color: var(--success); font-weight: bold; padding: 20px;">
+                    Вы уже оценили этот пост.
+                </div>
             </div>
         </div>
     </div>
@@ -226,14 +242,14 @@
     <script>
         const SUPABASE_URL = 'https://wghjexlosxmvnsdpmygc.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_jM4ku3evrUiAhgnG5DPStA_WYqcdLzI';
-        
-        // ТУТ ВАШ EMAIL (только этот аккаунт сможет редактировать создателей)
         const ADMIN_EMAIL = 'vlad.vaskin2006@gmail.com'; 
         
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
         let currentPostId = null;
         let allPosts = []; 
+        let allVotes = [];
+        let allProfiles = [];
         let myProfileData = null;
 
         async function init() {
@@ -248,15 +264,15 @@
                 document.getElementById('app-section').classList.remove('hidden');
                 document.getElementById('user-email').innerText = currentUser.email;
                 
-                // Проверка на админа
                 if (currentUser.email === ADMIN_EMAIL) {
                     document.getElementById('creator-edit-block').classList.remove('hidden');
+                    document.getElementById('home-edit-block').classList.remove('hidden');
                 } else {
                     document.getElementById('creator-edit-block').classList.add('hidden');
+                    document.getElementById('home-edit-block').classList.add('hidden');
                 }
 
                 await loadData();
-                await loadCreatorData();
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('app-section').classList.add('hidden');
@@ -264,100 +280,54 @@
         }
 
         function switchTab(tab) {
-            ['feed', 'add', 'profile', 'creators'].forEach(t => {
+            ['home', 'feed', 'add', 'profile', 'creators'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
                 document.getElementById('tab-' + t).classList.remove('active');
             });
             document.getElementById('view-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).classList.add('active');
+            
+            if(tab === 'home') { loadHomeText(); searchUsers(); }
         }
 
-        // --- ЛОГИКА СОЗДАТЕЛЕЙ ---
-        async function loadCreatorData() {
-            // Ищем специальный пост с ID 0 (или можно использовать любую другую логику, 
-            // но для простоты мы просто создадим пост с уникальным названием 'CREATOR_INFO')
-            // Для простоты мы будем хранить данные создателя в таблице profiles под специальным ID.
-            // Но так как база у нас уже есть, давайте использовать таблицу ratings, создав скрытый пост.
-            
-            // Альтернатива: Используем таблицу profiles, но с ID администратора.
-            // Тогда если он поменяет данные в профиле, они поменяются и здесь.
-            // Это самый простой путь без создания новых таблиц.
-
-            // Загружаем профиль админа
-            const { data } = await db.from('profiles').select('*').eq('id', (await db.from('profiles').select('id').eq('username', 'FrosBTW').single()).data?.id || '');
-            // Ой, это сложно. Давайте просто брать данные из его профиля.
-        }
-
-        // Упрощаем: берем данные создателя из его профиля
-        async function loadCreatorFromProfile() {
-            // Нам нужен ID админа. Мы знаем его email, значит можем найти профиль.
-            // Так как в profiles нет email, мы просто будем использовать ваши данные.
-            // Чтобы это работало, вы должны зайти под своим аккаунтом и настроить профиль.
-            
-            // Для надежности мы просто захардкодим ваши данные в коде, но будем брать их из профиля.
-            // (Это будет работать, только если вы уже сохранили свой профиль)
-            
-            // В реальном проекте лучше создать таблицу `site_settings`.
-            // Но чтобы не усложнять, мы просто возьмем данные из вашего профиля.
-            
-            const { data: allProfiles } = await db.from('profiles').select('*');
-            // Мы не знаем, какой ID у админа, пока он не войдет.
-            // Поэтому мы просто используем ID текущего пользователя, если это админ.
-            
-            if (currentUser.email === ADMIN_EMAIL) {
-                // Если зашел админ, показываем его данные
-                const { data: adminProfile } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
-                if (adminProfile) {
-                    document.getElementById('creator-name').innerText = adminProfile.username || 'Создатель';
-                    document.getElementById('creator-bio').innerText = adminProfile.bio || 'Описание отсутствует.';
-                    document.getElementById('creator-photo').src = adminProfile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
-                    
-                    // Заполняем форму редактирования
-                    document.getElementById('editCreatorName').value = adminProfile.username || '';
-                    document.getElementById('editCreatorBio').value = adminProfile.bio || '';
-                }
+        // --- ГЛАВНАЯ СТРАНИЦА ---
+        async function loadHomeText() {
+            const { data } = await db.from('site_settings').select('home_text').eq('id', 1).single();
+            if (data && data.home_text) {
+                document.getElementById('home-text-container').innerText = data.home_text;
+                if(currentUser.email === ADMIN_EMAIL) document.getElementById('editHomeText').value = data.home_text;
             } else {
-                // Если зашел не админ, нам нужно как-то показать данные админа.
-                // Так как мы не знаем его ID, мы просто выведем заглушку.
-                // В реальном проекте здесь должен быть запрос к конкретному ID.
-                document.getElementById('creator-name').innerText = 'Главный создатель';
-                document.getElementById('creator-bio').innerText = 'Чтобы увидеть данные, зайдите под аккаунтом создателя.';
-                document.getElementById('creator-photo').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=admin`;
+                document.getElementById('home-text-container').innerText = 'Добро пожаловать на Vibe Rating!';
             }
         }
 
-        // Сохранение данных создателя (только для админа)
-        async function saveCreatorInfo() {
-            if (currentUser.email !== ADMIN_EMAIL) return alert('У вас нет прав!');
-
-            const newName = document.getElementById('editCreatorName').value;
-            const newBio = document.getElementById('editCreatorBio').value;
-            const file = document.getElementById('editCreatorPhoto').files[0];
-            
-            let newAvatar = null;
-            if (file) {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `creator_${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
-                if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
-                const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
-                newAvatar = urlData.publicUrl;
-            }
-
-            const updates = { id: currentUser.id, username: newName, bio: newBio };
-            if (newAvatar) updates.avatar_url = newAvatar;
-
-            const { error } = await db.from('profiles').upsert(updates);
+        async function saveHomeText() {
+            const text = document.getElementById('editHomeText').value;
+            const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text });
             if (error) alert('Ошибка: ' + error.message);
-            else { 
-                alert('Данные создателя обновлены!'); 
-                await updateUI(); // Обновляем всё
-            }
+            else { alert('Текст сохранен!'); loadHomeText(); }
         }
 
+        function searchUsers() {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            const results = document.getElementById('user-results');
+            const filtered = allProfiles.filter(p => (p.username || '').toLowerCase().includes(query));
+            
+            if (query === '') { results.innerHTML = ''; return; }
+            if (filtered.length === 0) { results.innerHTML = '<p style="color:var(--text-muted);">Никого не найдено.</p>'; return; }
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА (АВТОРИЗАЦИЯ, ПОСТЫ, ОЦЕНКИ) ---
+            results.innerHTML = filtered.map(p => `
+                <div class="user-search-card">
+                    <img src="${p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`}">
+                    <div>
+                        <h4>${p.username || 'Без имени'}</h4>
+                        <p>${p.bio || 'Нет описания'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
 
+        // --- СИСТЕМНЫЕ ФУНКЦИИ ---
         async function signUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -401,6 +371,7 @@
             document.getElementById('add-preview-total').innerText = calculateScore(m, s, f, a, v);
         }
 
+        // --- ПОСТЫ ---
         async function createPost() {
             const file = document.getElementById('postImageFile').files[0];
             const title = document.getElementById('postTitle').value;
@@ -410,7 +381,7 @@
             const fileExt = file.name.split('.').pop();
             const fileName = `post_${Date.now()}.${fileExt}`;
             const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
-            if (uploadError) return alert('Ошибка загрузки картинки: ' + uploadError.message);
+            if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
 
             const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
 
@@ -427,18 +398,13 @@
             const v = parseInt(document.getElementById('add-vibe').value);
             const total = calculateScore(m, s, f, a, v);
 
-            const { error: voteError } = await db.from('votes').insert([{
-                rating_id: newPost.id,
-                user_id: currentUser.id,
+            await db.from('votes').insert([{
+                rating_id: newPost.id, user_id: currentUser.id,
                 makeup: m, style: s, figure: f, adequacy: a, vibe: v, total_score: total
             }]);
 
-            if (voteError) return alert('Пост создан, но оценка не сохранилась: ' + voteError.message);
-
             alert('Опубликовано и оценено!');
-            document.getElementById('postTitle').value = ''; 
-            document.getElementById('postText').value = ''; 
-            document.getElementById('postImageFile').value = '';
+            document.getElementById('postTitle').value = ''; document.getElementById('postText').value = ''; document.getElementById('postImageFile').value = '';
             switchTab('feed');
             await loadData();
         }
@@ -450,50 +416,44 @@
                 db.from('profiles').select('*')
             ]);
 
+            allProfiles = profilesRes.data || [];
+            allVotes = votesRes.data || [];
+            
             const profilesDict = {};
-            if (profilesRes.data) profilesRes.data.forEach(p => profilesDict[p.id] = p);
+            allProfiles.forEach(p => profilesDict[p.id] = p);
             myProfileData = profilesDict[currentUser.id];
             renderMyProfileHeader(myProfileData);
 
             allPosts = postsRes.data.map(post => {
-                const postVotes = votesRes.data.filter(v => v.rating_id === post.id);
+                const postVotes = allVotes.filter(v => v.rating_id === post.id);
                 let avgScore = 0;
                 if (postVotes.length > 0) {
-                    const sum = postVotes.reduce((acc, v) => acc + v.total_score, 0);
-                    avgScore = Math.round(sum / postVotes.length);
+                    avgScore = Math.round(postVotes.reduce((acc, v) => acc + v.total_score, 0) / postVotes.length);
                 }
                 return {
-                    ...post,
-                    avgScore: avgScore,
-                    voteCount: postVotes.length,
+                    ...post, avgScore: avgScore, voteCount: postVotes.length,
                     author: profilesDict[post.user_id] || { username: 'Пользователь', avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}` }
                 };
             });
 
             renderFeed();
             renderMyPosts();
+            loadHomeText();
         }
 
         function renderFeed() {
             const feed = document.getElementById('feed-list');
-            if (allPosts.length === 0) {
-                feed.innerHTML = '<p style="color: var(--text-muted);">Пока нет постов.</p>';
-                return;
-            }
+            if (allPosts.length === 0) { feed.innerHTML = '<p style="color: var(--text-muted);">Пока нет постов.</p>'; return; }
 
             feed.innerHTML = allPosts.map((item) => {
                 const date = new Date(item.created_at).toLocaleDateString('ru-RU');
                 const scoreDisplay = item.voteCount > 0 ? item.avgScore : '—';
-
                 return `
                 <div class="review-card" onclick="openModal(${item.id})">
                     <img src="${item.image_url}" class="card-img" alt="image">
                     <div class="card-content">
                         <div class="card-header">
-                            <div class="user-info">
-                                <img src="${item.author.avatar_url}" class="avatar">
-                                ${item.author.username}
-                            </div>
+                            <div class="user-info"><img src="${item.author.avatar_url}" class="avatar">${item.author.username}</div>
                             <div class="card-score-block">
                                 <div class="total-score">${scoreDisplay} <span style="font-size:0.4em; color:var(--text-muted);">/ 90</span></div>
                                 <div class="vote-count">${item.voteCount} оценок</div>
@@ -502,24 +462,60 @@
                         <div class="card-title">${item.title || 'Без названия'}</div>
                         <div class="card-date">${date}</div>
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('');
         }
 
+        // --- ПРОФИЛЬ (Личные оценки) ---
         function renderMyProfileHeader(profile) {
             if (profile) {
                 document.getElementById('my-username-display').innerText = profile.username || 'Без имени';
                 document.getElementById('my-bio-display').innerText = profile.bio || 'Нет описания';
                 document.getElementById('profileUsername').value = profile.username || '';
                 document.getElementById('profileBio').value = profile.bio || '';
-                const avatar = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
-                document.getElementById('my-avatar-preview').src = avatar;
+                document.getElementById('my-avatar-preview').src = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
             } else {
                 document.getElementById('my-username-display').innerText = 'Пользователь';
                 document.getElementById('my-bio-display').innerText = 'Заполните профиль';
                 document.getElementById('my-avatar-preview').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
             }
+        }
+
+        function renderMyPosts() {
+            const myList = document.getElementById('my-posts-list');
+            
+            // Берем ВСЕ ПОСТЫ, на которые ТЕКУЩИЙ пользователь поставил оценку
+            const myVotes = allVotes.filter(v => v.user_id === currentUser.id);
+            
+            if (myVotes.length === 0) {
+                myList.innerHTML = '<p style="color: var(--text-muted);">Вы пока не поставили ни одной оценки.</p>';
+                return;
+            }
+
+            myList.innerHTML = myVotes.map(vote => {
+                const post = allPosts.find(p => p.id === vote.rating_id);
+                if (!post) return ''; // Если пост удален
+                const date = new Date(post.created_at).toLocaleDateString('ru-RU');
+                
+                return `
+                <div class="review-card" onclick="openModal(${post.id})">
+                    <img src="${post.image_url}" class="card-img" alt="image">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="user-info">Оценка поста: ${post.title || 'Без названия'}</div>
+                            <div class="card-score-block">
+                                <!-- ВЫВОДИМ ЛИЧНУЮ ОЦЕНКУ ПОЛЬЗОВАТЕЛЯ -->
+                                <div class="total-score">${vote.total_score} <span style="font-size:0.4em; color:var(--text-muted);">/ 90</span></div>
+                                <div class="sub-scores" style="font-size: 0.8em; color: var(--accent);">
+                                    ${vote.makeup} ${vote.style} ${vote.figure} ${vote.adequacy} <span style="color: var(--purple);">${vote.vibe}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-date">${date}</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
         async function saveProfile() {
@@ -531,48 +527,67 @@
             if (file) {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `avatar_${currentUser.id}_${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
-                if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
+                await db.storage.from('images').upload(fileName, file);
                 const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
                 avatarUrl = urlData.publicUrl;
             }
 
             const updates = { id: currentUser.id, username: username, bio: bio, avatar_url: avatarUrl };
             const { error } = await db.from('profiles').upsert(updates);
-            
             if (error) alert('Ошибка: ' + error.message);
             else { alert('Профиль сохранен!'); await loadData(); }
         }
 
-        function renderMyPosts() {
-            const myList = document.getElementById('my-posts-list');
-            const myPosts = allPosts.filter(p => p.user_id === currentUser.id);
-
-            if (myPosts.length === 0) {
-                myList.innerHTML = '<p style="color: var(--text-muted);">Вы пока ничего не добавили.</p>';
-                return;
+        // --- СОЗДАТЕЛИ (Отдельная таблица) ---
+        async function loadCreatorData() {
+            // Читаем данные создателя из профиля админа (по email)
+            const { data: users } = await db.from('profiles').select('*'); // В реальном проекте лучше искать по auth.admin
+            // Так как мы не можем напрямую найти юзера по email через profiles, 
+            // мы сохраним данные в site_settings для надежности.
+            const { data } = await db.from('site_settings').select('*').eq('id', 2).single(); // id 2 = настройки создателя
+            
+            if (data) {
+                document.getElementById('creator-name').innerText = data.home_text.split('|')[0];
+                document.getElementById('creator-bio').innerText = data.home_text.split('|')[1];
+                if (data.home_text.split('|')[2]) document.getElementById('creator-photo').src = data.home_text.split('|')[2];
+                
+                if(currentUser.email === ADMIN_EMAIL) {
+                    document.getElementById('editCreatorName').value = data.home_text.split('|')[0];
+                    document.getElementById('editCreatorBio').value = data.home_text.split('|')[1];
+                }
             }
-
-            myList.innerHTML = myPosts.map((item) => {
-                const scoreDisplay = item.voteCount > 0 ? item.avgScore : '—';
-                return `
-                <div class="review-card" onclick="openModal(${item.id})">
-                    <img src="${item.image_url}" class="card-img" alt="image">
-                    <div class="card-content">
-                        <div class="card-header">
-                            <div class="user-info">Мой пост</div>
-                            <div class="card-score-block">
-                                <div class="total-score">${scoreDisplay} <span style="font-size:0.4em; color:var(--text-muted);">/ 90</span></div>
-                                <div class="vote-count">${item.voteCount} оценок</div>
-                            </div>
-                        </div>
-                        <div class="card-title">${item.title || 'Без названия'}</div>
-                    </div>
-                </div>
-                `;
-            }).join('');
         }
 
+        async function saveCreatorInfo() {
+            if (currentUser.email !== ADMIN_EMAIL) return alert('У вас нет прав!');
+
+            const newName = document.getElementById('editCreatorName').value;
+            const newBio = document.getElementById('editCreatorBio').value;
+            const file = document.getElementById('editCreatorPhoto').files[0];
+            
+            let newAvatar = null;
+            if (file) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `creator_${Date.now()}.${fileExt}`;
+                await db.storage.from('images').upload(fileName, file);
+                const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
+                newAvatar = urlData.publicUrl;
+            } else {
+                // Если фото не меняем, берем текущее
+                newAvatar = document.getElementById('creator-photo').src;
+            }
+
+            const combinedText = `${newName}|${newBio}|${newAvatar}`;
+            const { error } = await db.from('site_settings').upsert({ id: 2, home_text: combinedText });
+            
+            if (error) alert('Ошибка: ' + error.message);
+            else { 
+                alert('Данные создателя обновлены!'); 
+                loadCreatorData(); 
+            }
+        }
+
+        // --- МОДАЛЬНОЕ ОКНО И ОЦЕНКА ---
         function openModal(id) {
             const item = allPosts.find(p => p.id == id);
             if (!item) return;
@@ -585,10 +600,21 @@
             document.getElementById('modal-text').innerText = item.review_text || '';
             document.getElementById('modal-date').innerText = new Date(item.created_at).toLocaleDateString('ru-RU');
 
+            // ПРОВЕРКА: Оценивал ли уже этот юзер?
+            const alreadyVoted = allVotes.some(v => v.rating_id === item.id && v.user_id === currentUser.id);
+
             if (item.user_id === currentUser.id) {
                 document.getElementById('vote-form').style.display = 'none';
+                document.getElementById('already-voted-msg').style.display = 'none';
+                document.getElementById('already-voted-msg').innerText = "Это ваш пост.";
+                document.getElementById('already-voted-msg').classList.remove('hidden');
+            } else if (alreadyVoted) {
+                document.getElementById('vote-form').style.display = 'none';
+                document.getElementById('already-voted-msg').classList.remove('hidden');
+                document.getElementById('already-voted-msg').innerText = "Вы уже оценили этот пост.";
             } else {
                 document.getElementById('vote-form').style.display = 'block';
+                document.getElementById('already-voted-msg').classList.add('hidden');
             }
 
             updateVotePreview();
@@ -612,7 +638,6 @@
 
         async function submitVote() {
             if (!currentPostId) return;
-
             const m = parseInt(document.getElementById('vote-makeup').value);
             const s = parseInt(document.getElementById('vote-style').value);
             const f = parseInt(document.getElementById('vote-figure').value);
@@ -621,18 +646,12 @@
             const total = calculateScore(m, s, f, a, v);
 
             const { error } = await db.from('votes').insert([{
-                rating_id: currentPostId,
-                user_id: currentUser.id,
+                rating_id: currentPostId, user_id: currentUser.id,
                 makeup: m, style: s, figure: f, adequacy: a, vibe: v, total_score: total
             }]);
 
-            if (error) {
-                alert('Ошибка голосования: ' + error.message);
-            } else {
-                alert('Ваша оценка учтена!');
-                closeModal();
-                await loadData(); 
-            }
+            if (error) alert('Ошибка: ' + error.message);
+            else { alert('Ваша оценка учтена!'); closeModal(); await loadData(); }
         }
 
         function closeModal(event) {

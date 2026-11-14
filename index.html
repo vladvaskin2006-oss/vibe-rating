@@ -128,7 +128,6 @@
                 <input type="text" id="userSearch" placeholder="Введите никнейм для поиска..." oninput="searchUsers()">
                 <div id="user-results"></div>
 
-                <!-- Блок редактирования для админа -->
                 <div id="home-edit-block" class="hidden" style="margin-top: 30px; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--accent);">
                     <h3 style="color: var(--accent); margin-top: 0;">Редактировать текст главной (только для вас)</h3>
                     <textarea id="editHomeText" placeholder="Введите текст главной страницы..." style="min-height: 150px;"></textarea>
@@ -161,7 +160,6 @@
 
             <!-- Вкладка: Профиль -->
             <div id="view-profile" class="hidden">
-                <!-- Кнопка Назад, показывается только если мы смотрим чужой профиль -->
                 <button id="back-btn" class="back-btn hidden" onclick="backToSearch()">← Вернуться к поиску</button>
 
                 <h2 id="profile-title">Мой профиль</h2>
@@ -173,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- Форма редактирования (скрывается, если смотрим чужой профиль) -->
                 <div id="edit-profile-form" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
                     <label style="color: var(--text-muted); font-size: 14px;">Имя пользователя</label>
                     <input type="text" id="profileUsername" placeholder="Ваш никнейм">
@@ -261,7 +258,6 @@
         let allProfiles = [];
         let myProfileData = null;
         
-        // Переменная для хранения ID пользователя, чей профиль мы смотрим
         let viewingUserId = null;
 
         async function init() {
@@ -291,6 +287,7 @@
             }
         }
 
+        // ИСПРАВЛЕНО: Теперь вкладка Профиль не сбрасывает viewingUserId
         function switchTab(tab) {
             ['home', 'feed', 'add', 'profile', 'creators'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
@@ -300,8 +297,13 @@
             document.getElementById('tab-' + tab).classList.add('active');
             
             if(tab === 'home') { loadHomeText(); searchUsers(); }
-            // Если мы перешли на вкладку Профиль через кнопку (а не через поиск), сбрасываем на свой
-            if(tab === 'profile') { viewingUserId = currentUser.id; renderProfileTab(); }
+            if(tab === 'creators') { loadCreatorData(); } // ИСПРАВЛЕНО: Теперь данные создателя грузятся при каждом переходе
+            if(tab === 'profile') { 
+                // Если пользователь нажал на вкладку профиля, а до этого смотрел чужой, 
+                // то при нажатии на саму вкладку мы должны показать ЕГО профиль (свой).
+                // Но чтобы клик по нику работал, мы не сбрасываем viewingUserId здесь.
+                renderProfileTab(); 
+            }
         }
 
         // --- ГЛАВНАЯ СТРАНИЦА ---
@@ -356,13 +358,13 @@
 
         // --- ОТРИСОВКА ПРОФИЛЯ (СВОЕГО ИЛИ ЧУЖОГО) ---
         function renderProfileTab() {
-            const isMyProfile = viewingUserId === currentUser.id;
+            const isMyProfile = viewingUserId === currentUser.id || !viewingUserId;
             
             // Настройка интерфейса
             document.getElementById('profile-title').innerText = isMyProfile ? 'Мой профиль' : 'Профиль пользователя';
             document.getElementById('profile-posts-title').innerText = isMyProfile ? 'Мои оценки' : 'Оценки пользователя';
-            document.getElementById('back-btn').classList.toggle('hidden', isMyProfile); // Скрываем "Назад", если это свой профиль
-            document.getElementById('edit-profile-form').classList.toggle('hidden', !isMyProfile); // Скрываем форму редактирования, если чужой
+            document.getElementById('back-btn').classList.toggle('hidden', isMyProfile); 
+            document.getElementById('edit-profile-form').classList.toggle('hidden', !isMyProfile); 
 
             // Загружаем данные пользователя
             const profile = allProfiles.find(p => p.id === viewingUserId);
@@ -388,11 +390,10 @@
         // Отрисовка оценок (своих или чужих)
         function renderProfilePosts(isMyProfile) {
             const myList = document.getElementById('my-posts-list');
-            // Берем оценки того пользователя, чей профиль мы смотрим
             const userVotes = allVotes.filter(v => v.user_id === viewingUserId);
             
             if (userVotes.length === 0) {
-                myList.innerHTML = '<p style="color: var(--text-muted);">Этот пользователь пока не поставил ни одной оценки.</p>';
+                myList.innerHTML = '<p style="color: var(--text-muted);">Пока нет оценок.</p>';
                 return;
             }
 
@@ -516,11 +517,11 @@
             allProfiles.forEach(p => profilesDict[p.id] = p);
             myProfileData = profilesDict[currentUser.id];
             
-            // Если мы не смотрим чужой профиль, обновляем свой
-            if (!viewingUserId || viewingUserId === currentUser.id) {
+            // Если мы не смотрим чужой профиль, ставим ID текущего юзера
+            if (!viewingUserId) {
                 viewingUserId = currentUser.id;
-                renderProfileTab();
             }
+            renderProfileTab();
 
             allPosts = postsRes.data.map(post => {
                 const postVotes = allVotes.filter(v => v.rating_id === post.id);
@@ -536,6 +537,7 @@
 
             renderFeed();
             loadHomeText();
+            loadCreatorData(); // ИСПРАВЛЕНО: Загружаем данные создателя при старте
         }
 
         function renderFeed() {

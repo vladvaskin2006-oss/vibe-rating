@@ -60,6 +60,7 @@
         .total-preview { font-size: 2em; font-weight: 900; text-align: right; margin-top: 15px; color: white; }
         .total-preview small { font-size: 0.5em; color: var(--text-muted); font-weight: normal; }
 
+        /* Модальное окно */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--card-bg); width: 95%; max-width: 950px; border-radius: 16px; border: 1px solid var(--border); display: flex; overflow: hidden; position: relative; max-height: 90vh; }
@@ -69,19 +70,22 @@
         .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; }
         .modal-close:hover { background: rgba(255,255,255,0.3); }
         
-        .modal-score-header { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .modal-score-header { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
         .modal-total-score { font-size: 4em; font-weight: 900; line-height: 1; color: var(--success); }
         .modal-score-max { font-size: 1.5em; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; }
-        .modal-review-text { margin-bottom: 20px; color: #ddd; line-height: 1.5; white-space: pre-wrap; padding: 15px; background: #111; border-radius: 8px; }
         
-        .vote-form { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 10px; }
+        /* Средние оценки в модалке */
+        .avg-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #111; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .avg-item { font-size: 0.9em; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .avg-item span:last-child { color: white; font-weight: bold; }
+        
+        .modal-review-text { margin-bottom: 20px; color: #ddd; line-height: 1.5; white-space: pre-wrap; padding: 15px; background: #111; border-radius: 8px; border: 1px solid var(--border); }
+        
+        .vote-form { border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
         .vote-form h3 { margin-top: 0; margin-bottom: 15px; color: var(--accent); }
 
-        .creator-card { background: linear-gradient(145deg, #1a1a1d, #111); border: 1px solid var(--gold); border-radius: 16px; padding: 30px; display: flex; gap: 30px; align-items: center; box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); }
-        .creator-card img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); }
-        .creator-info h2 { margin: 0 0 10px 0; font-size: 2em; color: var(--gold); border: none; padding: 0; }
-        .creator-info p { margin: 0; color: #ddd; font-size: 1.1em; line-height: 1.5; }
-        
+        /* Стили для Главной */
+        .home-banner { width: 100%; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; display: block; object-fit: cover; max-height: 500px; }
         .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .user-search-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .user-search-card img { width: 50px; height: 50px; border-radius: 50%; }
@@ -119,27 +123,40 @@
                 <button id="tab-creators" onclick="switchTab('creators')">Создатели</button>
             </div>
 
-            <!-- Вкладка: Главная -->
+            <!-- Главная -->
             <div id="view-home" class="hidden">
                 <h2>Главная</h2>
+                
+                <!-- Блок с гифкой -->
+                <img id="home-banner-img" class="home-banner hidden" src="" alt="Banner">
+                
                 <div id="home-text-container" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; white-space: pre-wrap; line-height: 1.6;"></div>
                 
                 <h2>Поиск пользователей</h2>
                 <input type="text" id="userSearch" placeholder="Введите никнейм для поиска..." oninput="searchUsers()">
                 <div id="user-results"></div>
 
+                <!-- Блок редактирования для админа -->
                 <div id="home-edit-block" class="hidden" style="margin-top: 30px; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--accent);">
-                    <h3 style="color: var(--accent); margin-top: 0;">Редактировать текст главной (только для вас)</h3>
+                    <h3 style="color: var(--accent); margin-top: 0;">Редактировать Главную (только для вас)</h3>
+                    
+                    <label style="color: var(--text-muted); font-size: 14px;">Гифка или большая картинка (отображается над текстом)</label>
+                    <input type="file" id="homeBannerFile" accept="image/*,image/gif">
+                    
+                    <label style="color: var(--text-muted); font-size: 14px;">Текст приветствия</label>
                     <textarea id="editHomeText" placeholder="Введите текст главной страницы..." style="min-height: 150px;"></textarea>
-                    <button onclick="saveHomeText()">Сохранить текст</button>
+                    
+                    <button onclick="saveHomeSettings()">Сохранить настройки Главной</button>
                 </div>
             </div>
 
+            <!-- Лента -->
             <div id="view-feed" class="hidden">
                 <h2>Лента постов (средние оценки)</h2>
                 <div id="feed-list"><p style="color: var(--text-muted);">Загрузка...</p></div>
             </div>
 
+            <!-- Добавить пост -->
             <div id="view-add" class="hidden">
                 <h2>Добавить картинку и оценить</h2>
                 <input type="file" id="postImageFile" accept="image/*" required>
@@ -158,7 +175,7 @@
                 <button onclick="createPost()" style="margin-top: 15px;">Опубликовать</button>
             </div>
 
-            <!-- Вкладка: Профиль -->
+            <!-- Профиль -->
             <div id="view-profile" class="hidden">
                 <button id="back-btn" class="back-btn hidden" onclick="backToSearch()">← Вернуться к поиску</button>
 
@@ -185,13 +202,14 @@
                 <div id="my-posts-list"><p style="color: var(--text-muted);">Загрузка...</p></div>
             </div>
 
+            <!-- Создатели -->
             <div id="view-creators" class="hidden">
                 <h2>Создатели проекта</h2>
-                <div class="creator-card">
-                    <img id="creator-photo" src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Creator">
+                <div class="creator-card" style="background: linear-gradient(145deg, #1a1a1d, #111); border: 1px solid var(--gold); border-radius: 16px; padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <img id="creator-photo" src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin-bottom: 20px;" alt="Creator">
                     <div class="creator-info">
-                        <h2 id="creator-name">Имя создателя</h2>
-                        <p id="creator-bio">Описание отсутствует.</p>
+                        <h2 id="creator-name" style="margin: 0 0 10px 0; font-size: 2em; color: var(--gold); border: none; padding: 0;">Имя создателя</h2>
+                        <p id="creator-bio" style="margin: 0; color: #ddd; font-size: 1.1em; line-height: 1.5;">Описание отсутствует.</p>
                     </div>
                 </div>
                 
@@ -201,7 +219,7 @@
                     <input type="text" id="editCreatorName" placeholder="Ваше имя">
                     <label style="color: var(--text-muted); font-size: 14px;">Описание</label>
                     <textarea id="editCreatorBio" placeholder="Описание..."></textarea>
-                    <label style="color: var(--text-muted); font-size: 14px;">Фото</label>
+                    <label style="color: var(--text-muted); font-size: 14px;">Фото профиля</label>
                     <input type="file" id="editCreatorPhoto" accept="image/*">
                     <button onclick="saveCreatorInfo()" style="background: var(--gold); color: black; margin-top: 10px;">Сохранить данные создателя</button>
                 </div>
@@ -216,10 +234,26 @@
             <button class="modal-close" onclick="closeModal(event)">✕</button>
             <div class="modal-img-container"><img id="modal-img" src="" alt="Фото"></div>
             <div class="modal-info">
+                
+                <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="goToAuthorProfile()">
+                    <img id="modal-author-avatar" src="" class="avatar" style="width: 40px; height: 40px;">
+                    <span id="modal-author-name" style="font-weight: bold; font-size: 1.1em; text-decoration: underline; color: var(--accent);"></span>
+                </div>
+
                 <div class="modal-score-header">
                     <div class="modal-total-score" id="modal-avg-score">0</div>
                     <div class="modal-score-max">/ 90 <span style="font-size: 0.5em; display: block; color: var(--text-muted);" id="modal-votes-count">(0 оценок)</span></div>
                 </div>
+                
+                <!-- Блок со средними оценками за критерии -->
+                <div class="avg-details" id="modal-avg-details">
+                    <div class="avg-item"><span>Макияж</span> <span id="avg-makeup">-</span></div>
+                    <div class="avg-item"><span>Стиль</span> <span id="avg-style">-</span></div>
+                    <div class="avg-item"><span>Фигура</span> <span id="avg-figure">-</span></div>
+                    <div class="avg-item"><span>Адекватность</span> <span id="avg-adequacy">-</span></div>
+                    <div class="avg-item" style="grid-column: span 2; color: var(--purple);"><span>Вайб</span> <span id="avg-vibe" style="color: var(--purple);">-</span></div>
+                </div>
+
                 <h3 id="modal-title" style="margin-top: 0; margin-bottom: 5px;"></h3>
                 <div class="modal-review-text" id="modal-text"></div>
                 <div class="card-date" id="modal-date" style="margin-bottom: 10px;"></div>
@@ -253,6 +287,7 @@
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
         let currentPostId = null;
+        let currentAuthorId = null;
         let allPosts = []; 
         let allVotes = [];
         let allProfiles = [];
@@ -287,7 +322,6 @@
             }
         }
 
-        // ИСПРАВЛЕНО: Теперь вкладка Профиль не сбрасывает viewingUserId
         function switchTab(tab) {
             ['home', 'feed', 'add', 'profile', 'creators'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
@@ -296,35 +330,57 @@
             document.getElementById('view-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).classList.add('active');
             
-            if(tab === 'home') { loadHomeText(); searchUsers(); }
-            if(tab === 'creators') { loadCreatorData(); } // ИСПРАВЛЕНО: Теперь данные создателя грузятся при каждом переходе
-            if(tab === 'profile') { 
-                // Если пользователь нажал на вкладку профиля, а до этого смотрел чужой, 
-                // то при нажатии на саму вкладку мы должны показать ЕГО профиль (свой).
-                // Но чтобы клик по нику работал, мы не сбрасываем viewingUserId здесь.
-                renderProfileTab(); 
-            }
+            if(tab === 'home') { loadHomeSettings(); searchUsers(); }
+            if(tab === 'creators') { loadCreatorData(); }
+            if(tab === 'profile') { renderProfileTab(); }
         }
 
         // --- ГЛАВНАЯ СТРАНИЦА ---
-        async function loadHomeText() {
-            const { data } = await db.from('site_settings').select('home_text').eq('id', 1).single();
-            if (data && data.home_text) {
-                document.getElementById('home-text-container').innerText = data.home_text;
-                if(currentUser.email === ADMIN_EMAIL) document.getElementById('editHomeText').value = data.home_text;
-            } else {
-                document.getElementById('home-text-container').innerText = 'Добро пожаловать на Vibe Rating!';
+        async function loadHomeSettings() {
+            const { data } = await db.from('site_settings').select('home_text, banner_url').eq('id', 1).single();
+            
+            if (data) {
+                // Текст
+                if (data.home_text) {
+                    document.getElementById('home-text-container').innerText = data.home_text;
+                    if(currentUser.email === ADMIN_EMAIL) document.getElementById('editHomeText').value = data.home_text;
+                } else {
+                    document.getElementById('home-text-container').innerText = 'Добро пожаловать на Vibe Rating!';
+                }
+                
+                // Гифка
+                if (data.banner_url) {
+                    document.getElementById('home-banner-img').src = data.banner_url;
+                    document.getElementById('home-banner-img').classList.remove('hidden');
+                } else {
+                    document.getElementById('home-banner-img').classList.add('hidden');
+                }
             }
         }
 
-        async function saveHomeText() {
+        async function saveHomeSettings() {
             const text = document.getElementById('editHomeText').value;
-            const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text });
+            const file = document.getElementById('homeBannerFile').files[0];
+            
+            let bannerUrl = null; 
+            // Если уже была гифка, оставляем её
+            const { data: oldData } = await db.from('site_settings').select('banner_url').eq('id', 1).single();
+            if (oldData && oldData.banner_url) bannerUrl = oldData.banner_url;
+
+            if (file) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `banner_${Date.now()}.${fileExt}`;
+                const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
+                if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
+                const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
+                bannerUrl = urlData.publicUrl;
+            }
+
+            const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text, banner_url: bannerUrl });
             if (error) alert('Ошибка: ' + error.message);
-            else { alert('Текст сохранен!'); loadHomeText(); }
+            else { alert('Настройки Главной сохранены!'); loadHomeSettings(); }
         }
 
-        // --- ПОИСК ПОЛЬЗОВАТЕЛЕЙ ---
         function searchUsers() {
             const query = document.getElementById('userSearch').value.toLowerCase();
             const results = document.getElementById('user-results');
@@ -344,29 +400,24 @@
             `).join('');
         }
 
-        // Переход в чужой профиль
         function viewUserProfile(userId) {
             viewingUserId = userId;
             switchTab('profile');
         }
 
-        // Кнопка "Назад" к поиску
         function backToSearch() {
             viewingUserId = currentUser.id;
             switchTab('home');
         }
 
-        // --- ОТРИСОВКА ПРОФИЛЯ (СВОЕГО ИЛИ ЧУЖОГО) ---
         function renderProfileTab() {
             const isMyProfile = viewingUserId === currentUser.id || !viewingUserId;
             
-            // Настройка интерфейса
             document.getElementById('profile-title').innerText = isMyProfile ? 'Мой профиль' : 'Профиль пользователя';
             document.getElementById('profile-posts-title').innerText = isMyProfile ? 'Мои оценки' : 'Оценки пользователя';
             document.getElementById('back-btn').classList.toggle('hidden', isMyProfile); 
             document.getElementById('edit-profile-form').classList.toggle('hidden', !isMyProfile); 
 
-            // Загружаем данные пользователя
             const profile = allProfiles.find(p => p.id === viewingUserId);
             
             if (profile) {
@@ -387,7 +438,6 @@
             renderProfilePosts(isMyProfile);
         }
 
-        // Отрисовка оценок (своих или чужих)
         function renderProfilePosts(isMyProfile) {
             const myList = document.getElementById('my-posts-list');
             const userVotes = allVotes.filter(v => v.user_id === viewingUserId);
@@ -504,10 +554,11 @@
         }
 
         async function loadData() {
-            const [postsRes, votesRes, profilesRes] = await Promise.all([
+            const [postsRes, votesRes, profilesRes, settingsRes] = await Promise.all([
                 db.from('ratings').select('*').order('created_at', { ascending: false }),
                 db.from('votes').select('*'),
-                db.from('profiles').select('*')
+                db.from('profiles').select('*'),
+                db.from('site_settings').select('*')
             ]);
 
             allProfiles = profilesRes.data || [];
@@ -517,7 +568,6 @@
             allProfiles.forEach(p => profilesDict[p.id] = p);
             myProfileData = profilesDict[currentUser.id];
             
-            // Если мы не смотрим чужой профиль, ставим ID текущего юзера
             if (!viewingUserId) {
                 viewingUserId = currentUser.id;
             }
@@ -536,8 +586,8 @@
             });
 
             renderFeed();
-            loadHomeText();
-            loadCreatorData(); // ИСПРАВЛЕНО: Загружаем данные создателя при старте
+            loadHomeSettings();
+            loadCreatorData();
         }
 
         function renderFeed() {
@@ -630,6 +680,7 @@
             const item = allPosts.find(p => p.id == id);
             if (!item) return;
             currentPostId = item.id;
+            currentAuthorId = item.user_id;
 
             document.getElementById('modal-img').src = item.image_url;
             document.getElementById('modal-avg-score').innerText = item.voteCount > 0 ? item.avgScore : '—';
@@ -637,6 +688,29 @@
             document.getElementById('modal-title').innerText = item.title || 'Без названия';
             document.getElementById('modal-text').innerText = item.review_text || '';
             document.getElementById('modal-date').innerText = new Date(item.created_at).toLocaleDateString('ru-RU');
+
+            // Инфа об авторе
+            document.getElementById('modal-author-avatar').src = item.author.avatar_url;
+            document.getElementById('modal-author-name').innerText = item.author.username;
+
+            // Средние оценки по критериям
+            const postVotes = allVotes.filter(v => v.rating_id === item.id);
+            if (postVotes.length > 0) {
+                const avgM = Math.round(postVotes.reduce((a, b) => a + b.makeup, 0) / postVotes.length);
+                const avgS = Math.round(postVotes.reduce((a, b) => a + b.style, 0) / postVotes.length);
+                const avgF = Math.round(postVotes.reduce((a, b) => a + b.figure, 0) / postVotes.length);
+                const avgA = Math.round(postVotes.reduce((a, b) => a + b.adequacy, 0) / postVotes.length);
+                const avgV = Math.round(postVotes.reduce((a, b) => a + b.vibe, 0) / postVotes.length);
+                
+                document.getElementById('avg-makeup').innerText = avgM;
+                document.getElementById('avg-style').innerText = avgS;
+                document.getElementById('avg-figure').innerText = avgF;
+                document.getElementById('avg-adequacy').innerText = avgA;
+                document.getElementById('avg-vibe').innerText = avgV;
+                document.getElementById('modal-avg-details').classList.remove('hidden');
+            } else {
+                document.getElementById('modal-avg-details').classList.add('hidden');
+            }
 
             const alreadyVoted = allVotes.some(v => v.rating_id === item.id && v.user_id === currentUser.id);
 
@@ -656,6 +730,13 @@
 
             updateVotePreview();
             document.getElementById('modal').classList.add('active');
+        }
+
+        // Переход в профиль автора из модального окна
+        function goToAuthorProfile() {
+            closeModal();
+            viewingUserId = currentAuthorId;
+            switchTab('profile');
         }
 
         function updateVotePreview() {

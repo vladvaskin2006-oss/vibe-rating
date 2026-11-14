@@ -82,10 +82,14 @@
         .creator-info h2 { margin: 0 0 10px 0; font-size: 2em; color: var(--gold); border: none; padding: 0; }
         .creator-info p { margin: 0; color: #ddd; font-size: 1.1em; line-height: 1.5; }
         
-        .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); }
+        .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+        .user-search-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .user-search-card img { width: 50px; height: 50px; border-radius: 50%; }
         .user-search-card h4 { margin: 0; font-size: 1.2em; }
         .user-search-card p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9em; }
+
+        .back-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: auto; padding: 8px 15px; margin-bottom: 20px; display: inline-block; }
+        .back-btn:hover { background: var(--card-bg); color: white; }
 
         .hidden { display: none !important; }
     </style>
@@ -155,8 +159,12 @@
                 <button onclick="createPost()" style="margin-top: 15px;">Опубликовать</button>
             </div>
 
+            <!-- Вкладка: Профиль -->
             <div id="view-profile" class="hidden">
-                <h2>Мой профиль</h2>
+                <!-- Кнопка Назад, показывается только если мы смотрим чужой профиль -->
+                <button id="back-btn" class="back-btn hidden" onclick="backToSearch()">← Вернуться к поиску</button>
+
+                <h2 id="profile-title">Мой профиль</h2>
                 <div class="profile-header">
                     <img id="my-avatar-preview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" class="profile-avatar-preview">
                     <div class="profile-info">
@@ -165,7 +173,8 @@
                     </div>
                 </div>
 
-                <div style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
+                <!-- Форма редактирования (скрывается, если смотрим чужой профиль) -->
+                <div id="edit-profile-form" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
                     <label style="color: var(--text-muted); font-size: 14px;">Имя пользователя</label>
                     <input type="text" id="profileUsername" placeholder="Ваш никнейм">
                     <label style="color: var(--text-muted); font-size: 14px;">О себе</label>
@@ -175,7 +184,7 @@
                     <button onclick="saveProfile()">Сохранить профиль</button>
                 </div>
 
-                <h2>Мои посты и оценки</h2>
+                <h2 id="profile-posts-title">Мои оценки</h2>
                 <div id="my-posts-list"><p style="color: var(--text-muted);">Загрузка...</p></div>
             </div>
 
@@ -251,6 +260,9 @@
         let allVotes = [];
         let allProfiles = [];
         let myProfileData = null;
+        
+        // Переменная для хранения ID пользователя, чей профиль мы смотрим
+        let viewingUserId = null;
 
         async function init() {
             const { data: { session } } = await db.auth.getSession();
@@ -288,6 +300,8 @@
             document.getElementById('tab-' + tab).classList.add('active');
             
             if(tab === 'home') { loadHomeText(); searchUsers(); }
+            // Если мы перешли на вкладку Профиль через кнопку (а не через поиск), сбрасываем на свой
+            if(tab === 'profile') { viewingUserId = currentUser.id; renderProfileTab(); }
         }
 
         // --- ГЛАВНАЯ СТРАНИЦА ---
@@ -308,6 +322,7 @@
             else { alert('Текст сохранен!'); loadHomeText(); }
         }
 
+        // --- ПОИСК ПОЛЬЗОВАТЕЛЕЙ ---
         function searchUsers() {
             const query = document.getElementById('userSearch').value.toLowerCase();
             const results = document.getElementById('user-results');
@@ -317,7 +332,7 @@
             if (filtered.length === 0) { results.innerHTML = '<p style="color:var(--text-muted);">Никого не найдено.</p>'; return; }
 
             results.innerHTML = filtered.map(p => `
-                <div class="user-search-card">
+                <div class="user-search-card" onclick="viewUserProfile('${p.id}')">
                     <img src="${p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`}">
                     <div>
                         <h4>${p.username || 'Без имени'}</h4>
@@ -325,6 +340,85 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Переход в чужой профиль
+        function viewUserProfile(userId) {
+            viewingUserId = userId;
+            switchTab('profile');
+        }
+
+        // Кнопка "Назад" к поиску
+        function backToSearch() {
+            viewingUserId = currentUser.id;
+            switchTab('home');
+        }
+
+        // --- ОТРИСОВКА ПРОФИЛЯ (СВОЕГО ИЛИ ЧУЖОГО) ---
+        function renderProfileTab() {
+            const isMyProfile = viewingUserId === currentUser.id;
+            
+            // Настройка интерфейса
+            document.getElementById('profile-title').innerText = isMyProfile ? 'Мой профиль' : 'Профиль пользователя';
+            document.getElementById('profile-posts-title').innerText = isMyProfile ? 'Мои оценки' : 'Оценки пользователя';
+            document.getElementById('back-btn').classList.toggle('hidden', isMyProfile); // Скрываем "Назад", если это свой профиль
+            document.getElementById('edit-profile-form').classList.toggle('hidden', !isMyProfile); // Скрываем форму редактирования, если чужой
+
+            // Загружаем данные пользователя
+            const profile = allProfiles.find(p => p.id === viewingUserId);
+            
+            if (profile) {
+                document.getElementById('my-username-display').innerText = profile.username || 'Без имени';
+                document.getElementById('my-bio-display').innerText = profile.bio || 'Нет описания';
+                document.getElementById('my-avatar-preview').src = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`;
+                
+                if(isMyProfile) {
+                    document.getElementById('profileUsername').value = profile.username || '';
+                    document.getElementById('profileBio').value = profile.bio || '';
+                }
+            } else {
+                document.getElementById('my-username-display').innerText = 'Пользователь';
+                document.getElementById('my-bio-display').innerText = 'Заполните профиль';
+                document.getElementById('my-avatar-preview').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${viewingUserId}`;
+            }
+
+            renderProfilePosts(isMyProfile);
+        }
+
+        // Отрисовка оценок (своих или чужих)
+        function renderProfilePosts(isMyProfile) {
+            const myList = document.getElementById('my-posts-list');
+            // Берем оценки того пользователя, чей профиль мы смотрим
+            const userVotes = allVotes.filter(v => v.user_id === viewingUserId);
+            
+            if (userVotes.length === 0) {
+                myList.innerHTML = '<p style="color: var(--text-muted);">Этот пользователь пока не поставил ни одной оценки.</p>';
+                return;
+            }
+
+            myList.innerHTML = userVotes.map(vote => {
+                const post = allPosts.find(p => p.id === vote.rating_id);
+                if (!post) return '';
+                const date = new Date(post.created_at).toLocaleDateString('ru-RU');
+                
+                return `
+                <div class="review-card" onclick="openModal(${post.id})">
+                    <img src="${post.image_url}" class="card-img" alt="image">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="user-info">Пост: ${post.title || 'Без названия'}</div>
+                            <div class="card-score-block">
+                                <div class="total-score">${vote.total_score} <span style="font-size:0.4em; color:var(--text-muted);">/ 90</span></div>
+                                <div class="sub-scores" style="font-size: 0.8em; color: var(--accent);">
+                                    ${vote.makeup} ${vote.style} ${vote.figure} ${vote.adequacy} <span style="color: var(--purple);">${vote.vibe}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-date">${date}</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
         // --- СИСТЕМНЫЕ ФУНКЦИИ ---
@@ -371,7 +465,6 @@
             document.getElementById('add-preview-total').innerText = calculateScore(m, s, f, a, v);
         }
 
-        // --- ПОСТЫ ---
         async function createPost() {
             const file = document.getElementById('postImageFile').files[0];
             const title = document.getElementById('postTitle').value;
@@ -422,7 +515,12 @@
             const profilesDict = {};
             allProfiles.forEach(p => profilesDict[p.id] = p);
             myProfileData = profilesDict[currentUser.id];
-            renderMyProfileHeader(myProfileData);
+            
+            // Если мы не смотрим чужой профиль, обновляем свой
+            if (!viewingUserId || viewingUserId === currentUser.id) {
+                viewingUserId = currentUser.id;
+                renderProfileTab();
+            }
 
             allPosts = postsRes.data.map(post => {
                 const postVotes = allVotes.filter(v => v.rating_id === post.id);
@@ -437,7 +535,6 @@
             });
 
             renderFeed();
-            renderMyPosts();
             loadHomeText();
         }
 
@@ -466,58 +563,6 @@
             }).join('');
         }
 
-        // --- ПРОФИЛЬ (Личные оценки) ---
-        function renderMyProfileHeader(profile) {
-            if (profile) {
-                document.getElementById('my-username-display').innerText = profile.username || 'Без имени';
-                document.getElementById('my-bio-display').innerText = profile.bio || 'Нет описания';
-                document.getElementById('profileUsername').value = profile.username || '';
-                document.getElementById('profileBio').value = profile.bio || '';
-                document.getElementById('my-avatar-preview').src = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
-            } else {
-                document.getElementById('my-username-display').innerText = 'Пользователь';
-                document.getElementById('my-bio-display').innerText = 'Заполните профиль';
-                document.getElementById('my-avatar-preview').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.id}`;
-            }
-        }
-
-        function renderMyPosts() {
-            const myList = document.getElementById('my-posts-list');
-            
-            // Берем ВСЕ ПОСТЫ, на которые ТЕКУЩИЙ пользователь поставил оценку
-            const myVotes = allVotes.filter(v => v.user_id === currentUser.id);
-            
-            if (myVotes.length === 0) {
-                myList.innerHTML = '<p style="color: var(--text-muted);">Вы пока не поставили ни одной оценки.</p>';
-                return;
-            }
-
-            myList.innerHTML = myVotes.map(vote => {
-                const post = allPosts.find(p => p.id === vote.rating_id);
-                if (!post) return ''; // Если пост удален
-                const date = new Date(post.created_at).toLocaleDateString('ru-RU');
-                
-                return `
-                <div class="review-card" onclick="openModal(${post.id})">
-                    <img src="${post.image_url}" class="card-img" alt="image">
-                    <div class="card-content">
-                        <div class="card-header">
-                            <div class="user-info">Оценка поста: ${post.title || 'Без названия'}</div>
-                            <div class="card-score-block">
-                                <!-- ВЫВОДИМ ЛИЧНУЮ ОЦЕНКУ ПОЛЬЗОВАТЕЛЯ -->
-                                <div class="total-score">${vote.total_score} <span style="font-size:0.4em; color:var(--text-muted);">/ 90</span></div>
-                                <div class="sub-scores" style="font-size: 0.8em; color: var(--accent);">
-                                    ${vote.makeup} ${vote.style} ${vote.figure} ${vote.adequacy} <span style="color: var(--purple);">${vote.vibe}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-date">${date}</div>
-                    </div>
-                </div>
-                `;
-            }).join('');
-        }
-
         async function saveProfile() {
             const username = document.getElementById('profileUsername').value;
             const bio = document.getElementById('profileBio').value;
@@ -538,14 +583,9 @@
             else { alert('Профиль сохранен!'); await loadData(); }
         }
 
-        // --- СОЗДАТЕЛИ (Отдельная таблица) ---
+        // --- СОЗДАТЕЛИ ---
         async function loadCreatorData() {
-            // Читаем данные создателя из профиля админа (по email)
-            const { data: users } = await db.from('profiles').select('*'); // В реальном проекте лучше искать по auth.admin
-            // Так как мы не можем напрямую найти юзера по email через profiles, 
-            // мы сохраним данные в site_settings для надежности.
-            const { data } = await db.from('site_settings').select('*').eq('id', 2).single(); // id 2 = настройки создателя
-            
+            const { data } = await db.from('site_settings').select('*').eq('id', 2).single();
             if (data) {
                 document.getElementById('creator-name').innerText = data.home_text.split('|')[0];
                 document.getElementById('creator-bio').innerText = data.home_text.split('|')[1];
@@ -573,7 +613,6 @@
                 const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
                 newAvatar = urlData.publicUrl;
             } else {
-                // Если фото не меняем, берем текущее
                 newAvatar = document.getElementById('creator-photo').src;
             }
 
@@ -581,10 +620,7 @@
             const { error } = await db.from('site_settings').upsert({ id: 2, home_text: combinedText });
             
             if (error) alert('Ошибка: ' + error.message);
-            else { 
-                alert('Данные создателя обновлены!'); 
-                loadCreatorData(); 
-            }
+            else { alert('Данные создателя обновлены!'); loadCreatorData(); }
         }
 
         // --- МОДАЛЬНОЕ ОКНО И ОЦЕНКА ---
@@ -600,7 +636,6 @@
             document.getElementById('modal-text').innerText = item.review_text || '';
             document.getElementById('modal-date').innerText = new Date(item.created_at).toLocaleDateString('ru-RU');
 
-            // ПРОВЕРКА: Оценивал ли уже этот юзер?
             const alreadyVoted = allVotes.some(v => v.rating_id === item.id && v.user_id === currentUser.id);
 
             if (item.user_id === currentUser.id) {

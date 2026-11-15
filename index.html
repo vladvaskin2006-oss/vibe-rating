@@ -74,7 +74,6 @@
         .modal-total-score { font-size: 4em; font-weight: 900; line-height: 1; color: var(--success); }
         .modal-score-max { font-size: 1.5em; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; }
         
-        /* Средние оценки в модалке */
         .avg-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #111; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
         .avg-item { font-size: 0.9em; color: var(--text-muted); display: flex; justify-content: space-between; }
         .avg-item span:last-child { color: white; font-weight: bold; }
@@ -85,7 +84,21 @@
         .vote-form h3 { margin-top: 0; margin-bottom: 15px; color: var(--accent); }
 
         /* Стили для Главной */
-        .home-banner { width: 100%; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; display: block; object-fit: cover; max-height: 500px; }
+        /* ФЛЕКС-КОНТЕЙНЕР ДЛЯ ПЛЕЕРА И ГИФКИ */
+        .home-top-row { display: flex; gap: 20px; margin-bottom: 30px; align-items: stretch; }
+        
+        .home-player-container { flex: 0 0 614px; max-width: 100%; }
+        .home-player-container iframe { width: 100%; height: 100%; min-height: 244px; border-radius: 12px; border: 1px solid var(--border); display: block; }
+
+        .home-banner-container { flex: 1; }
+        .home-banner { width: 100%; height: 100%; max-height: 500px; border-radius: 12px; border: 1px solid var(--border); display: block; object-fit: cover; }
+
+        /* Адаптивность для телефонов */
+        @media (max-width: 800px) {
+            .home-top-row { flex-direction: column; }
+            .home-player-container { flex: auto; }
+        }
+
         .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .user-search-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .user-search-card img { width: 50px; height: 50px; border-radius: 50%; }
@@ -127,8 +140,13 @@
             <div id="view-home" class="hidden">
                 <h2>Главная</h2>
                 
-                <!-- Блок с гифкой -->
-                <img id="home-banner-img" class="home-banner hidden" src="" alt="Banner">
+                <!-- Блок плеера и гифки -->
+                <div class="home-top-row" id="home-media-block">
+                    <div class="home-player-container" id="music-container"></div>
+                    <div class="home-banner-container">
+                        <img id="home-banner-img" class="home-banner hidden" src="" alt="Banner">
+                    </div>
+                </div>
                 
                 <div id="home-text-container" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; white-space: pre-wrap; line-height: 1.6;"></div>
                 
@@ -140,11 +158,14 @@
                 <div id="home-edit-block" class="hidden" style="margin-top: 30px; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--accent);">
                     <h3 style="color: var(--accent); margin-top: 0;">Редактировать Главную (только для вас)</h3>
                     
-                    <label style="color: var(--text-muted); font-size: 14px;">Гифка или большая картинка (отображается над текстом)</label>
+                    <label style="color: var(--text-muted); font-size: 14px;">Гифка или большая картинка (справа)</label>
                     <input type="file" id="homeBannerFile" accept="image/*,image/gif">
                     
+                    <label style="color: var(--text-muted); font-size: 14px;">HTML-код плеера Яндекс Музыки (слева)</label>
+                    <textarea id="editMusicHtml" placeholder="Вставьте сюда <iframe ...></iframe>" style="min-height: 100px;"></textarea>
+
                     <label style="color: var(--text-muted); font-size: 14px;">Текст приветствия</label>
-                    <textarea id="editHomeText" placeholder="Введите текст главной страницы..." style="min-height: 150px;"></textarea>
+                    <textarea id="editHomeText" placeholder="Введите текст главной страницы..." style="min-height: 100px;"></textarea>
                     
                     <button onclick="saveHomeSettings()">Сохранить настройки Главной</button>
                 </div>
@@ -245,7 +266,6 @@
                     <div class="modal-score-max">/ 90 <span style="font-size: 0.5em; display: block; color: var(--text-muted);" id="modal-votes-count">(0 оценок)</span></div>
                 </div>
                 
-                <!-- Блок со средними оценками за критерии -->
                 <div class="avg-details" id="modal-avg-details">
                     <div class="avg-item"><span>Макияж</span> <span id="avg-makeup">-</span></div>
                     <div class="avg-item"><span>Стиль</span> <span id="avg-style">-</span></div>
@@ -337,7 +357,7 @@
 
         // --- ГЛАВНАЯ СТРАНИЦА ---
         async function loadHomeSettings() {
-            const { data } = await db.from('site_settings').select('home_text, banner_url').eq('id', 1).single();
+            const { data } = await db.from('site_settings').select('home_text, banner_url, music_html').eq('id', 1).single();
             
             if (data) {
                 // Текст
@@ -355,15 +375,26 @@
                 } else {
                     document.getElementById('home-banner-img').classList.add('hidden');
                 }
+
+                // Плеер (iframe)
+                const musicContainer = document.getElementById('music-container');
+                if (data.music_html) {
+                    musicContainer.innerHTML = data.music_html;
+                    musicContainer.classList.remove('hidden');
+                    if(currentUser.email === ADMIN_EMAIL) document.getElementById('editMusicHtml').value = data.music_html;
+                } else {
+                    musicContainer.innerHTML = '';
+                    musicContainer.classList.add('hidden');
+                }
             }
         }
 
         async function saveHomeSettings() {
             const text = document.getElementById('editHomeText').value;
+            const musicHtml = document.getElementById('editMusicHtml').value;
             const file = document.getElementById('homeBannerFile').files[0];
             
             let bannerUrl = null; 
-            // Если уже была гифка, оставляем её
             const { data: oldData } = await db.from('site_settings').select('banner_url').eq('id', 1).single();
             if (oldData && oldData.banner_url) bannerUrl = oldData.banner_url;
 
@@ -376,7 +407,7 @@
                 bannerUrl = urlData.publicUrl;
             }
 
-            const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text, banner_url: bannerUrl });
+            const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text, banner_url: bannerUrl, music_html: musicHtml });
             if (error) alert('Ошибка: ' + error.message);
             else { alert('Настройки Главной сохранены!'); loadHomeSettings(); }
         }
@@ -689,11 +720,9 @@
             document.getElementById('modal-text').innerText = item.review_text || '';
             document.getElementById('modal-date').innerText = new Date(item.created_at).toLocaleDateString('ru-RU');
 
-            // Инфа об авторе
             document.getElementById('modal-author-avatar').src = item.author.avatar_url;
             document.getElementById('modal-author-name').innerText = item.author.username;
 
-            // Средние оценки по критериям
             const postVotes = allVotes.filter(v => v.rating_id === item.id);
             if (postVotes.length > 0) {
                 const avgM = Math.round(postVotes.reduce((a, b) => a + b.makeup, 0) / postVotes.length);
@@ -732,7 +761,6 @@
             document.getElementById('modal').classList.add('active');
         }
 
-        // Переход в профиль автора из модального окна
         function goToAuthorProfile() {
             closeModal();
             viewingUserId = currentAuthorId;

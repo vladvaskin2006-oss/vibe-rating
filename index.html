@@ -19,6 +19,17 @@
         .container { width: 100%; max-width: 800px; }
         h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 30px; font-family: 'Amatic SC', cursive; font-size: 2.5em; font-weight: 700; letter-spacing: 1px; }
         
+        /* --- 3D ТЕКСТ ДЛЯ ВХОДА --- */
+        .welcome-title {
+            text-align: center; margin-top: 50px; margin-bottom: 40px; font-family: 'Amatic SC', cursive; font-size: 4em; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 5px;
+            text-shadow: 1px 1px 0 #ccc, 2px 2px 0 #c9c9c9, 3px 3px 0 #bbb, 4px 4px 0 #b9b9b9, 5px 5px 0 #aaa, 6px 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(99, 102, 241, 0.5), 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.5);
+            animation: neonPulse 2s infinite alternate;
+        }
+        @keyframes neonPulse {
+            from { text-shadow: 1px 1px 0 #ccc, 2px 2px 0 #c9c9c9, 3px 3px 0 #bbb, 4px 4px 0 #b9b9b9, 5px 5px 0 #aaa, 6px 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(99, 102, 241, 0.5), 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.5); }
+            to { text-shadow: 1px 1px 0 #ccc, 2px 2px 0 #c9c9c9, 3px 3px 0 #bbb, 4px 4px 0 #b9b9b9, 5px 5px 0 #aaa, 6px 6px 1px rgba(0,0,0,.1), 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.8), 0 0 80px rgba(168, 85, 247, 0.8); }
+        }
+
         .nav-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: var(--card-bg); padding: 5px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; }
         .nav-tabs button { flex: 1; background: transparent; color: var(--text-muted); margin: 0; padding: 10px 5px; border-radius: 8px; font-size: 13px; white-space: nowrap; transition: 0.2s; }
         .nav-tabs button.active { background: var(--accent); color: white; }
@@ -44,30 +55,9 @@
         .review-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); display: flex; gap: 16px; cursor: pointer; transition: 0.2s; position: relative; }
         .review-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         
-        .review-card.perfect-post {
-            border-color: var(--fire);
-            animation: fireGlow 2s infinite ease-in-out;
-            overflow: visible; 
-        }
-        /* Искорки */
-        .review-card.perfect-post::after {
-            content: "✨";
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            font-size: 24px;
-            animation: sparkle 1.5s infinite;
-            pointer-events: none;
-        }
-        .review-card.perfect-post::before {
-            content: "🔥";
-            position: absolute;
-            bottom: -15px;
-            left: -15px;
-            font-size: 24px;
-            animation: sparkle 1.8s infinite;
-            pointer-events: none;
-        }
+        .review-card.perfect-post { border-color: var(--fire); animation: fireGlow 2s infinite ease-in-out; overflow: visible; }
+        .review-card.perfect-post::after { content: "✨"; position: absolute; top: -15px; right: -15px; font-size: 24px; animation: sparkle 1.5s infinite; pointer-events: none; }
+        .review-card.perfect-post::before { content: "🔥"; position: absolute; bottom: -15px; left: -15px; font-size: 24px; animation: sparkle 1.8s infinite; pointer-events: none; }
 
         .card-img { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #333; }
         .card-content { flex: 1; overflow: hidden; }
@@ -81,7 +71,7 @@
         .card-date { font-size: 0.75em; color: var(--text-muted); margin-top: 8px; }
         .vote-count { font-size: 0.8em; color: var(--success); font-weight: bold; margin-top: 5px; }
 
-        /* Роли (Анимация) */
+        /* Роли */
         .role-gold-text { background: linear-gradient(90deg, #fbbf24, #fef08a, #fbbf24); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; font-weight: bold; }
         .role-purple-text { background: linear-gradient(90deg, #a855f7, #6366f1, #a855f7); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; font-weight: bold; }
         .role-badge { font-family: 'Amatic SC', cursive; font-size: 1.5em; font-weight: 700; letter-spacing: 1px; padding: 2px 10px; border-radius: 6px; margin-left: 15px; border: 1px solid; }
@@ -89,7 +79,6 @@
         .badge-purple { color: var(--purple); border-color: var(--purple); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); text-shadow: 0 0 5px rgba(168, 85, 247, 0.5); }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* Профиль */
         .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); position: relative; transition: 0.3s; }
         .profile-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: var(--border); }
         .profile-info { flex: 1; }
@@ -113,7 +102,6 @@
         .total-preview { font-size: 2em; font-weight: 900; text-align: right; margin-top: 15px; color: white; }
         .total-preview small { font-size: 0.5em; color: var(--text-muted); font-weight: normal; }
 
-        /* Модальное окно */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--card-bg); width: 95%; max-width: 950px; border-radius: 16px; border: 1px solid var(--border); display: flex; overflow: hidden; position: relative; max-height: 90vh; }
@@ -139,7 +127,6 @@
         .vote-form { border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
         .vote-form h3 { margin-top: 0; margin-bottom: 15px; color: var(--accent); }
 
-        /* Главная */
         .home-top-row { display: flex; gap: 20px; margin-bottom: 30px; align-items: stretch; }
         .home-player-container { flex: 0 0 614px; max-width: 100%; }
         .home-player-container iframe { width: 100%; height: 100%; min-height: 244px; border-radius: 12px; border: 1px solid var(--border); display: block; }
@@ -149,6 +136,9 @@
         @media (max-width: 800px) {
             .home-top-row { flex-direction: column; }
             .home-player-container { flex: auto; }
+            .modal-content { flex-direction: column; overflow-y: auto; }
+            .modal-img-container { width: 100%; height: 300px; }
+            .modal-info { width: 100%; }
         }
 
         .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
@@ -167,26 +157,54 @@
         .edit-vote-btn:hover { background: rgba(99, 102, 241, 0.1); }
 
         .hidden { display: none !important; }
+
+        /* --- КАСТОМНЫЕ УВЕДОМЛЕНИЯ (ТОСТЫ) --- */
+        .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast {
+            background: #222; color: white; padding: 15px 20px; border-radius: 10px; border: 1px solid #444;
+            display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transform: translateX(120%); opacity: 0; transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.3s;
+            font-weight: 500;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--fire); }
+        
+        /* Анимированная SVG-галочка */
+        .checkmark { width: 24px; height: 24px; border-radius: 50%; display: block; stroke-width: 3; stroke: #fff; stroke-miterlimit: 10; box-shadow: inset 0px 0px 0px var(--success); }
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 3; stroke-miterlimit: 10; stroke: var(--success); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke: var(--success); animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+
+        .crossmark { width: 24px; height: 24px; stroke-width: 3; stroke: var(--fire); fill: none; }
+        .crossmark path { stroke-dasharray: 100; stroke-dashoffset: 100; animation: stroke 0.5s forwards; }
     </style>
 </head>
 <body>
 
+    <!-- Контейнер для уведомлений -->
+    <div class="toast-container" id="toast-container"></div>
+
     <div class="container">
+        <!-- ЭКРАН ВХОДА -->
         <div id="auth-section">
-            <h2>Вход в систему</h2>
-            <input type="email" id="email" placeholder="Ваша почта" required>
-            <input type="password" id="password" placeholder="Пароль" required>
-            <button onclick="signUp()">Зарегистрироваться</button>
-            <button onclick="signIn()">Войти</button>
+            <h1 class="welcome-title">Добро пожаловать<br>на ИВЗГ</h1>
+            <div style="background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--border);">
+                <h2 style="margin-top: 0; text-align: center; border: none;">Вход в систему</h2>
+                <input type="email" id="email" placeholder="Ваша почта" required>
+                <input type="password" id="password" placeholder="Пароль" required>
+                <button onclick="signUp()">Зарегистрироваться</button>
+                <button onclick="signIn()">Войти</button>
+            </div>
         </div>
 
+        <!-- ОСНОВНОЙ САЙТ -->
         <div id="app-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 style="margin: 0; font-family: 'Amatic SC', cursive; font-size: 2.5em; color: var(--accent); letter-spacing: 2px;">ИВЗГ</h1>
                 <button onclick="logout()" style="width: auto; padding: 5px 15px; background: transparent; border: 1px solid var(--border);">Выйти</button>
             </div>
 
-            <!-- Обновленные вкладки -->
             <div class="nav-tabs">
                 <button id="tab-home" onclick="switchTab('home')">Главная</button>
                 <button id="tab-feed" class="active" onclick="switchTab('feed')">Лента</button>
@@ -358,6 +376,39 @@
         let viewingUserId = null;
         let currentVoteId = null;
 
+        // --- ФУНКЦИЯ КАСТОМНЫХ УВЕДОМЛЕНИЙ ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let iconHtml = '';
+            if (type === 'success') {
+                iconHtml = `
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>`;
+            } else {
+                iconHtml = `
+                <svg class="crossmark" viewBox="0 0 52 52">
+                    <path d="M16 16 L36 36 M36 16 L16 36" stroke-linecap="round"/>
+                </svg>`;
+            }
+
+            toast.innerHTML = `${iconHtml} <span>${message}</span>`;
+            container.appendChild(toast);
+
+            // Небольшая задержка для срабатывания CSS-анимации
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Удаление через 3.5 секунды
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
         async function init() {
             const { data: { session } } = await db.auth.getSession();
             currentUser = session?.user;
@@ -377,8 +428,11 @@
 
                 await loadData();
             } else {
-                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('app-section').classList.add('hidden');
+                
+                allPosts = []; allVotes = []; allProfiles = [];
+                viewingUserId = null; currentVoteId = null;
             }
         }
 
@@ -395,7 +449,6 @@
             if(tab === 'halloffame') { renderHallOfFame(); }
         }
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РОЛЕЙ ---
         function getRoleInfo(role) {
             if (role === 'admin') return { name: 'ОСНОВАТЕЛЬ', badgeClass: 'badge-gold', textClass: 'role-gold-text', borderClass: 'search-border-gold', profileBorderClass: 'profile-border-gold' };
             if (role === 'expert') return { name: 'ЭКСПЕРТ', badgeClass: 'badge-purple', textClass: 'role-purple-text', borderClass: 'search-border-purple', profileBorderClass: 'profile-border-purple' };
@@ -445,14 +498,14 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `banner_${Date.now()}.${fileExt}`;
                 const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
-                if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
+                if (uploadError) return showToast('Ошибка загрузки: ' + uploadError.message, 'error');
                 const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
                 bannerUrl = urlData.publicUrl;
             }
 
             const { error } = await db.from('site_settings').upsert({ id: 1, home_text: text, banner_url: bannerUrl, music_html: musicHtml });
-            if (error) alert('Ошибка: ' + error.message);
-            else { alert('Настройки Главной сохранены!'); loadHomeSettings(); }
+            if (error) showToast('Ошибка: ' + error.message, 'error');
+            else { showToast('Настройки Главной сохранены!', 'success'); loadHomeSettings(); }
         }
 
         function searchUsers() {
@@ -578,20 +631,19 @@
             }).join('');
         }
 
-        // --- СИСТЕМНЫЕ ФУНКЦИИ ---
         async function signUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const { error } = await db.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert('Проверьте почту!');
+            if (error) showToast(error.message, 'error');
+            else showToast('Проверьте почту!', 'success');
         }
 
         async function signIn() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const { data, error } = await db.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
+            if (error) showToast(error.message, 'error');
             else { currentUser = data.user; updateUI(); }
         }
 
@@ -626,12 +678,12 @@
             const file = document.getElementById('postImageFile').files[0];
             const title = document.getElementById('postTitle').value;
             const text = document.getElementById('postText').value;
-            if (!file) return alert('Выберите картинку!');
+            if (!file) return showToast('Выберите картинку!', 'error');
 
             const fileExt = file.name.split('.').pop();
             const fileName = `post_${Date.now()}.${fileExt}`;
             const { error: uploadError } = await db.storage.from('images').upload(fileName, file);
-            if (uploadError) return alert('Ошибка загрузки: ' + uploadError.message);
+            if (uploadError) return showToast('Ошибка загрузки: ' + uploadError.message, 'error');
 
             const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
 
@@ -639,7 +691,7 @@
                 title: title, review_text: text, image_url: urlData.publicUrl, user_id: currentUser.id
             }]).select().single();
 
-            if (dbError) return alert('Ошибка создания поста: ' + dbError.message);
+            if (dbError) return showToast('Ошибка создания поста: ' + dbError.message, 'error');
 
             const m = parseInt(document.getElementById('add-makeup').value);
             const s = parseInt(document.getElementById('add-style').value);
@@ -653,7 +705,7 @@
                 makeup: m, style: s, figure: f, adequacy: a, vibe: v, total_score: total
             }]);
 
-            alert('Опубликовано и оценено!');
+            showToast('Опубликовано и оценено!', 'success');
             document.getElementById('postTitle').value = ''; document.getElementById('postText').value = ''; document.getElementById('postImageFile').value = '';
             switchTab('feed');
             await loadData();
@@ -726,10 +778,8 @@
             }).join('');
         }
 
-        // --- ЗАЛ СЛАВЫ ---
         function renderHallOfFame() {
             const list = document.getElementById('halloffame-list');
-            // Фильтруем посты: средний балл 90 И минимум 2 оценки
             const perfectPosts = allPosts.filter(p => p.avgScore === 90 && p.voteCount >= 2);
 
             if (perfectPosts.length === 0) {
@@ -778,11 +828,10 @@
 
             const updates = { id: currentUser.id, username: username, bio: bio, avatar_url: avatarUrl };
             const { error } = await db.from('profiles').upsert(updates);
-            if (error) alert('Ошибка: ' + error.message);
-            else { alert('Профиль сохранен!'); await loadData(); }
+            if (error) showToast('Ошибка: ' + error.message, 'error');
+            else { showToast('Профиль сохранен!', 'success'); await loadData(); }
         }
 
-        // --- МОДАЛЬНОЕ ОКНО И ОЦЕНКА ---
         function openModal(id, viewVoteUserId = null) {
             const item = allPosts.find(p => p.id == id);
             if (!item) return;
@@ -835,8 +884,7 @@
             const alreadyVotedMsg = document.getElementById('already-voted-msg');
             const editVoteBtn = document.getElementById('edit-vote-btn');
             const voteSubmitBtn = document.getElementById('vote-submit-btn');
-            const voteFormTitle = document.getElementById('vote-form-title');
-
+            
             voteForm.style.display = 'none';
             alreadyVotedMsg.classList.add('hidden');
             editVoteBtn.classList.add('hidden');
@@ -947,8 +995,12 @@
                 error = res.error;
             }
 
-            if (error) alert('Ошибка: ' + error.message);
-            else { alert('Оценка сохранена!'); closeModal(); await loadData(); }
+            if (error) showToast('Ошибка: ' + error.message, 'error');
+            else { 
+                showToast('Оценка успешно сохранена!', 'success'); 
+                closeModal(); 
+                await loadData(); 
+            }
         }
 
         function closeModal(event) {

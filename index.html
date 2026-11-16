@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ИВЗГ - Vibe Rating</title>
     
-    <!-- Подключаем красивый шрифт -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
@@ -31,7 +30,6 @@
         button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         button:hover { background: #4f46e5; }
         
-        /* Стили для карточек */
         .review-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); display: flex; gap: 16px; cursor: pointer; transition: 0.2s; }
         .review-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .card-img { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #333; }
@@ -63,7 +61,6 @@
             font-weight: bold;
         }
 
-        /* Бейджи ролей (для профиля и поиска) */
         .role-badge {
             font-family: 'Amatic SC', cursive;
             font-size: 1.5em;
@@ -74,18 +71,8 @@
             margin-left: 15px;
             border: 1px solid;
         }
-        .badge-gold {
-            color: var(--gold);
-            border-color: var(--gold);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
-            text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
-        }
-        .badge-purple {
-            color: var(--purple);
-            border-color: var(--purple);
-            box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
-            text-shadow: 0 0 5px rgba(168, 85, 247, 0.5);
-        }
+        .badge-gold { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); text-shadow: 0 0 5px rgba(251, 191, 36, 0.5); }
+        .badge-purple { color: var(--purple); border-color: var(--purple); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); text-shadow: 0 0 5px rgba(168, 85, 247, 0.5); }
 
         @keyframes shine { to { background-position: 200% center; } }
 
@@ -148,21 +135,18 @@
             .home-player-container { flex: auto; }
         }
 
-        /* Поиск пользователей */
         .user-search-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .user-search-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .user-search-card img { width: 50px; height: 50px; border-radius: 50%; }
         .user-search-card h4 { margin: 0; font-size: 1.2em; display: flex; align-items: center;}
         .user-search-card p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9em; }
 
-        /* Рамки для поиска */
         .search-border-gold { border-color: var(--gold) !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.1); }
         .search-border-purple { border-color: var(--purple) !important; box-shadow: 0 0 10px rgba(168, 85, 247, 0.1); }
 
         .back-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: auto; padding: 8px 15px; margin-bottom: 20px; display: inline-block; }
         .back-btn:hover { background: var(--card-bg); color: white; }
 
-        /* Кнопка изменения оценки */
         .edit-vote-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; width: auto; display: inline-block; }
         .edit-vote-btn:hover { background: rgba(99, 102, 241, 0.1); }
 
@@ -257,7 +241,6 @@
                     <div class="profile-info">
                         <h3>
                             <span id="my-username-display">Загрузка...</span>
-                            <!-- Бейдж роли -->
                             <span id="my-role-badge" class="role-badge hidden"></span>
                         </h3>
                         <p id="my-bio-display"></p>
@@ -525,13 +508,11 @@
             if (profile) {
                 const role = getRoleInfo(profile.role);
                 
-                // Ник и цвет
                 document.getElementById('my-username-display').innerText = profile.username || 'Без имени';
                 document.getElementById('my-username-display').className = role.textClass;
                 document.getElementById('my-bio-display').innerText = profile.bio || 'Нет описания';
                 document.getElementById('my-avatar-preview').src = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`;
                 
-                // Бейдж роли
                 if (role.name) {
                     roleBadge.innerText = role.name;
                     roleBadge.className = `role-badge ${role.badgeClass}`;
@@ -574,6 +555,7 @@
                 if (authorProfile && authorProfile.role === 'admin') voteTypeText = "Оценка основателя проекта";
                 if (authorProfile && authorProfile.role === 'expert') voteTypeText = "Оценка эксперта по грязнулькам";
 
+                // Передаем viewingUserId в openModal как строку, чтобы избежать путаницы
                 return `
                 <div class="review-card" onclick="openModal(${post.id}, '${vote.user_id}')">
                     <img src="${post.image_url}" class="card-img" alt="image">
@@ -804,9 +786,11 @@
         }
 
         // --- МОДАЛЬНОЕ ОКНО И ОЦЕНКА ---
+        // viewVoteUserId должен быть строкой или null
         function openModal(id, viewVoteUserId = null) {
             const item = allPosts.find(p => p.id == id);
             if (!item) return;
+            
             currentPostId = item.id;
             currentAuthorId = item.user_id;
             currentVoteId = null;
@@ -855,6 +839,7 @@
             editVoteBtn.classList.add('hidden');
             voteSubmitBtn.innerText = 'Отправить оценку';
 
+            // 1. Если это чужой профиль - показываем оценку этого пользователя
             if (viewVoteUserId && viewVoteUserId !== currentUser.id) {
                 const viewedUserVote = allVotes.find(v => v.rating_id === item.id && v.user_id === viewVoteUserId);
                 if (viewedUserVote) {
@@ -866,27 +851,32 @@
                     alreadyVotedMsg.innerText = `Оценка ${voteType}: ${viewedUserVote.total_score} / 90`;
                     alreadyVotedMsg.classList.remove('hidden');
                 }
+                document.getElementById('modal').classList.add('active');
                 return; 
             }
 
-            if (item.user_id === currentUser.id) {
-                alreadyVotedMsg.innerText = "Это ваш пост. Вы не можете оценивать свои посты.";
-                alreadyVotedMsg.classList.remove('hidden');
-            } else if (myVote) {
+            // 2. Если это наш пост или мы просто кликнули из ленты
+            if (myVote) {
                 const voteTime = new Date(myVote.created_at).getTime();
                 const now = new Date().getTime();
                 const threeDays = 3 * 24 * 60 * 60 * 1000;
 
+                // Если это свой пост ИЛИ есть моя оценка
                 if (now - voteTime < threeDays) {
-                    alreadyVotedMsg.innerText = `Вы уже оценили этот пост (Ваша оценка: ${myVote.total_score}).`;
+                    alreadyVotedMsg.innerText = `Вы оценили этот пост на ${myVote.total_score}.`;
                     alreadyVotedMsg.classList.remove('hidden');
-                    editVoteBtn.classList.remove('hidden');
+                    editVoteBtn.classList.remove('hidden'); // Кнопка изменения доступна всегда, если есть оценка
                     currentVoteId = myVote.id;
                 } else {
                     alreadyVotedMsg.innerText = `Вы оценили этот пост более 3 дней назад. Изменение недоступно.`;
                     alreadyVotedMsg.classList.remove('hidden');
                 }
+            } else if (item.user_id === currentUser.id) {
+                // Свой пост, но своей оценки еще нет (не должно происходить, но на всякий случай)
+                alreadyVotedMsg.innerText = "Это ваш пост.";
+                alreadyVotedMsg.classList.remove('hidden');
             } else {
+                // Можно голосовать
                 voteForm.style.display = 'block';
                 updateVotePreview();
             }
